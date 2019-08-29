@@ -6,6 +6,11 @@ const setupTest = () => {
     yesno.restore();
     const code = '12345';
     const accessToken = 'aaabbbcccddd';
+    const config = {
+        SLACK_CLIENT_ID: process.env.SLACK_CLIENT_ID,
+        SLACK_CLIENT_SECRET: process.env.SLACK_CLIENT_SECRET,
+        SLACK_OAUTH_ACCESS_URL: process.env.SLACK_OAUTH_ACCESS_URL,
+    };
 
     yesno.mock([
         {
@@ -26,7 +31,7 @@ const setupTest = () => {
             },
         },
     ]);
-    return { code, accessToken };
+    return { code, accessToken, config };
 };
 
 describe('getAccessToken', () => {
@@ -38,8 +43,8 @@ describe('getAccessToken', () => {
     });
 
     it('should request an access token from Slack', async () => {
-        const { code } = setupTest();
-        await Slack.getAccessToken(code);
+        const { config, code } = setupTest();
+        await Slack.getAccessToken(config, code);
 
         const {
             request: { body },
@@ -54,9 +59,9 @@ describe('getAccessToken', () => {
     });
 
     it('should return the accessToken returned from slack', async () => {
-        const { code, accessToken } = setupTest();
-        const output = await Slack.getAccessToken(code);
+        const { config, code, accessToken } = setupTest();
+        const output = await Slack.getAccessToken(config, code);
 
-        expect(accessToken).toEqual(accessToken);
+        expect(output).toEqual(accessToken);
     });
 });

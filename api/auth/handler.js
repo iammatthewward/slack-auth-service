@@ -10,7 +10,7 @@ const handleUpstreamServiceError = (service) => (err = {}) => {
     };
 };
 
-function handlerFactory(app) {
+function handlerFactory({ config, dynamo }) {
     return async function handler(request, reply) {
         try {
             const handleSlackError = handleUpstreamServiceError('Slack');
@@ -19,8 +19,10 @@ function handlerFactory(app) {
             const { code, error } = request.query;
             if (error) return reply.code(403).send({ error: 'access denied' });
 
-            const accessToken = await getAccessToken(code).catch(handleSlackError);
-            const userIdentity = await getIdentity(accessToken).catch(
+            const accessToken = await getAccessToken(config, code).catch(
+                handleSlackError
+            );
+            const userIdentity = await getIdentity(config, accessToken).catch(
                 handleSlackError
             );
 
@@ -31,7 +33,7 @@ function handlerFactory(app) {
                     accessToken,
                 },
             };
-            await app.dynamo
+            await dynamo
                 .put(params)
                 .promise()
                 .catch(handleDatabaseError);

@@ -1,14 +1,14 @@
 const qs = require('querystring');
 const axios = require('axios');
 
-const {
-    SLACK_CLIENT_ID,
-    SLACK_CLIENT_SECRET,
-    SLACK_OAUTH_ACCESS_URL,
-} = process.env;
-
-async function getAccessToken(code) {
+async function getAccessToken(config, code) {
     if (!code) throw Error('Required param missing: code');
+
+    const {
+        SLACK_CLIENT_ID,
+        SLACK_CLIENT_SECRET,
+        SLACK_OAUTH_ACCESS_URL,
+    } = config;
 
     const params = {
         client_id: SLACK_CLIENT_ID,

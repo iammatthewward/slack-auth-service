@@ -1,9 +1,9 @@
 const axios = require('axios');
 
-const { SLACK_USERS_IDENTITY_URL } = process.env;
-
-async function getIdentity(authToken) {
+async function getIdentity(config, authToken) {
     if (!authToken) throw Error('Required param missing: authToken');
+
+    const { SLACK_USERS_IDENTITY_URL } = config;
 
     const {
         user: { name: userName, id: userId },

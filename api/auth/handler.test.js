@@ -11,7 +11,8 @@ const setupTest = ({ dynamoError } = {}) => {
             ),
         }),
     };
-    const app = { dynamo };
+    const config = {};
+    const app = { dynamo, config };
     const code = 'XXYYZZ';
     const request = { query: { code } };
     const reply = { code: jest.fn().mockReturnValue({ send: jest.fn() }) };
@@ -35,22 +36,23 @@ const setupTest = ({ dynamoError } = {}) => {
         accessToken,
         userIdentity,
         dynamo,
+        config,
     };
 };
 
 describe('handler', () => {
     it('should exchange the request query code for an access token', async () => {
-        const { handler, request, reply, code } = setupTest();
+        const { handler, request, reply, code, config } = setupTest();
         await handler(request, reply);
 
-        expect(Slack.getAccessToken).toHaveBeenCalledWith(code);
+        expect(Slack.getAccessToken).toHaveBeenCalledWith(config, code);
     });
 
     it('should use the access token to request user indentity data', async () => {
-        const { handler, request, reply, accessToken } = setupTest();
+        const { handler, request, reply, accessToken, config } = setupTest();
         await handler(request, reply);
 
-        expect(Slack.getIdentity).toHaveBeenCalledWith(accessToken);
+        expect(Slack.getIdentity).toHaveBeenCalledWith(config, accessToken);
     });
 
     it('should store the returned access token and identity', async () => {

@@ -8,6 +8,9 @@ const setupTest = () => {
     const userId = 'U0G9QF9C6';
     const userName = 'Fred';
     const teamId = 'T0G9PQBBK';
+    const config = {
+        SLACK_USERS_IDENTITY_URL: process.env.SLACK_USERS_IDENTITY_URL,
+    };
 
     yesno.mock([
         {
@@ -32,7 +35,7 @@ const setupTest = () => {
             },
         },
     ]);
-    return { accessToken, userName, userId, teamId };
+    return { config, accessToken, userName, userId, teamId };
 };
 
 describe('getIdentity', () => {
@@ -44,8 +47,8 @@ describe('getIdentity', () => {
     });
 
     it('should request a users identity from Slack', async () => {
-        const { accessToken } = setupTest();
-        await Slack.getIdentity(accessToken);
+        const { config, accessToken } = setupTest();
+        await Slack.getIdentity(config, accessToken);
 
         const {
             request: { query },
@@ -58,22 +61,22 @@ describe('getIdentity', () => {
     });
 
     it('should return the userName returned from slack', async () => {
-        const { accessToken, userName } = setupTest();
-        const output = await Slack.getIdentity(accessToken);
+        const { config, accessToken, userName } = setupTest();
+        const output = await Slack.getIdentity(config, accessToken);
 
         expect(output.userName).toEqual(userName);
     });
 
     it('should return the userId returned from slack', async () => {
-        const { accessToken, userId } = setupTest();
-        const output = await Slack.getIdentity(accessToken);
+        const { config, accessToken, userId } = setupTest();
+        const output = await Slack.getIdentity(config, accessToken);
 
         expect(output.userId).toEqual(userId);
     });
 
     it('should return the teamId returned from slack', async () => {
-        const { accessToken, teamId } = setupTest();
-        const output = await Slack.getIdentity(accessToken);
+        const { config, accessToken, teamId } = setupTest();
+        const output = await Slack.getIdentity(config, accessToken);
 
         expect(output.teamId).toEqual(teamId);
     });

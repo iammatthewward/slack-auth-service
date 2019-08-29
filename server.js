@@ -6,14 +6,14 @@ const dynamodb = require('fastify-dynamodb');
 
 const app = fastify({ logger: true });
 
-const { PORT, AWS_REGION } = process.env;
+const { PORT, HOST, AWS_REGION } = process.env;
 
 app
+    .register(env, { schema: require('./schema/env'), dotenv: true })
     .register(oas, require('./docs'))
-    .register(env, { schema: require('./schema/env') })
     .register(dynamodb, { region: AWS_REGION })
     .register(require('./api'))
-    .listen(PORT, '0.0.0.0', (err, address) => {
+    .listen(PORT, HOST, (err, address) => {
         if (err) {
             app.log.error(err);
             process.exit(1);
