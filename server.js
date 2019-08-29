@@ -1,6 +1,8 @@
 require('dotenv').config();
 const fastify = require('fastify');
 const oas = require('fastify-oas');
+const env = require('fastify-env');
+const dynamodb = require('fastify-dynamodb');
 
 const app = fastify({ logger: true });
 
@@ -8,6 +10,8 @@ const { PORT } = process.env;
 
 app
     .register(oas, require('./docs'))
+    .register(env, { schema: require('./schema/env') })
+    .register(dynamodb)
     .register(require('./api'))
     .listen(PORT, '0.0.0.0', (err, address) => {
         if (err) {

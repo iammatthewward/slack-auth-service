@@ -1,4 +1,4 @@
-const qs = require('qs');
+const qs = require('querystring');
 const axios = require('axios');
 
 const {
@@ -20,7 +20,7 @@ async function getAccessToken(code) {
         .post(SLACK_OAUTH_ACCESS_URL, qs.stringify(params))
         .then(({ data }) => data);
 
-    return { accessToken };
+    return accessToken;
 }
 
 module.exports = getAccessToken;

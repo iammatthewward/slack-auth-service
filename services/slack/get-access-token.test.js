@@ -57,6 +57,6 @@ describe('getAccessToken', () => {
         const { code, accessToken } = setupTest();
         const output = await Slack.getAccessToken(code);
 
-        expect(output.accessToken).toEqual(accessToken);
+        expect(accessToken).toEqual(accessToken);
     });
 });

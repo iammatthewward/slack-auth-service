@@ -20,6 +20,7 @@ module.exports = {
     quotes: ["error", "single"],
     semi: ["error", "always"],
     "comma-dangle": ["error", "always-multiline"],
-    "max-len": ["error", { code: 85 }]
+    "max-len": ["error", { code: 85 }],
+    "arrow-parens": ["error", "always"]
   }
 };
