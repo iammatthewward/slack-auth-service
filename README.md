@@ -11,10 +11,10 @@ A simply service for managing authentication flows for [OAuth Slack flows][].
 
 - Install [Yarn][]
 - Run `yarn` (install)
-- Create a `.env` file from the [env config example][]
+- Create a `.env` file matching the [env config schema][]
 
 [yarn]: https://yarnpkg.com/en/docs/install
-[env config example]: /docs/env-config
+[env config schema]: /schema/env.js
 
 
 ## Usage
@@ -28,3 +28,10 @@ A simply service for managing authentication flows for [OAuth Slack flows][].
 | run tests in watch mode                                           | `yarn test --watch`   |
 | check for linting errors                                          | `yarn lint`           |
 | fix linting errors                                                | `yarn lint:fix`       |
+
+
+## Features
+
+* Sign in with Slack
+* Add to Slack (TODO)
+* Delete user (TODO)

@@ -10,6 +10,7 @@ async function getIdentity(authToken) {
         team: { id: teamId },
     } = await axios
         .get(SLACK_USERS_IDENTITY_URL, {
+            headers: { 'content-type': 'application/x-www-form-urlencoded' },
             params: { token: authToken },
         })
         .then(({ data }) => data);
