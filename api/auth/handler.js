@@ -31,6 +31,7 @@ function handlerFactory({ config, dynamo }) {
                 Item: {
                     ...userIdentity,
                     accessToken,
+                    createdAt: Date.now(),
                 },
             };
             await dynamo

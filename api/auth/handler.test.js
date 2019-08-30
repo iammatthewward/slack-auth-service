@@ -1,9 +1,13 @@
+const lolex = require('lolex');
 const handlerFactory = require('./handler');
 const Slack = require('../../services/slack');
 
 jest.mock('../../services/slack');
 
+let clock;
+
 const setupTest = ({ dynamoError } = {}) => {
+    clock = lolex.install({ now: 1567163437497 });
     const dynamo = {
         put: jest.fn().mockReturnValue({
             promise: jest.fn(() =>
@@ -41,6 +45,8 @@ const setupTest = ({ dynamoError } = {}) => {
 };
 
 describe('handler', () => {
+    afterAll(() => clock.uninstall());
+
     it('should exchange the request query code for an access token', async () => {
         const { handler, request, reply, code, config } = setupTest();
         await handler(request, reply);
@@ -68,13 +74,25 @@ describe('handler', () => {
 
         expect(dynamo.put).toHaveBeenCalledWith({
             TableName: process.env.USER_IDENTITY_TABLE,
-            Item: {
+            Item: expect.objectContaining({
                 ...userIdentity,
                 accessToken,
-            },
+            }),
         });
     });
 
+    it('should store the current time as createdAt value', async () => {
+        const { handler, request, reply, dynamo } = setupTest();
+        await handler(request, reply);
+
+        expect(dynamo.put).toHaveBeenCalledWith(
+            expect.objectContaining({
+                Item: expect.objectContaining({
+                    createdAt: 1567163437497,
+                }),
+            })
+        );
+    });
     it('should return 201 with the non-private entity fields', async () => {
         const { handler, request, reply, userIdentity } = setupTest();
         await handler(request, reply);
