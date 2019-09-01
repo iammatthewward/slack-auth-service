@@ -15,6 +15,7 @@ module.exports = {
         SLACK_USERS_IDENTITY_URL: { type: 'string' },
         USER_IDENTITY_TABLE: { type: 'string' },
         AWS_REGION: { type: 'string' },
+        AWS_ENDPOINT: { type: 'string' },
     },
     required: [
         'PORT',

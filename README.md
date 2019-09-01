@@ -7,13 +7,19 @@ A simply service for managing authentication flows for [OAuth Slack flows][].
 
 [OAuth Slack flows]: https://api.slack.com/docs/oauth
 
+## Prerequisites
+
+- [Docker][] installed and running
+- [Yarn][] installed
+
+[Docker]: https://docs.docker.com/docker-for-mac/install/
+[Yarn]: https://yarnpkg.com/en/docs/install
+
 ## Installation
 
-- Install [Yarn][]
-- Run `yarn` (install)
+- Run `yarn`
 - Create a `.env` file matching the [env config schema][]
 
-[yarn]: https://yarnpkg.com/en/docs/install
 [env config schema]: /schema/env.js
 
 
