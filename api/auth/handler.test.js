@@ -1,22 +1,16 @@
-const lolex = require('lolex');
 const handlerFactory = require('./handler');
 const Slack = require('../../services/slack');
 
 jest.mock('../../services/slack');
 
-let clock;
-
-const setupTest = ({ dynamoError } = {}) => {
-    clock = lolex.install({ now: 1567163437497 });
-    const dynamo = {
-        put: jest.fn().mockReturnValue({
-            promise: jest.fn(() =>
-                dynamoError ? Promise.reject(dynamoError) : Promise.resolve()
-            ),
-        }),
+const setupTest = ({ dbError } = {}) => {
+    const db = {
+        putUserIdentity: jest.fn(() =>
+            dbError ? Promise.reject(dbError) : Promise.resolve()
+        ),
     };
     const config = {};
-    const app = { dynamo, config };
+    const app = { config, db };
     const code = 'XXYYZZ';
     const request = { query: { code } };
     const reply = { code: jest.fn().mockReturnValue({ send: jest.fn() }) };
@@ -39,14 +33,12 @@ const setupTest = ({ dynamoError } = {}) => {
         reply,
         accessToken,
         userIdentity,
-        dynamo,
+        db,
         config,
     };
 };
 
 describe('handler', () => {
-    afterAll(() => clock.uninstall());
-
     it('should exchange the request query code for an access token', async () => {
         const { handler, request, reply, code, config } = setupTest();
         await handler(request, reply);
@@ -68,31 +60,16 @@ describe('handler', () => {
             reply,
             accessToken,
             userIdentity,
-            dynamo,
+            db,
         } = setupTest();
         await handler(request, reply);
 
-        expect(dynamo.put).toHaveBeenCalledWith({
-            TableName: process.env.USER_IDENTITY_TABLE,
-            Item: expect.objectContaining({
-                ...userIdentity,
-                accessToken,
-            }),
+        expect(db.putUserIdentity).toHaveBeenCalledWith({
+            accessToken,
+            ...userIdentity,
         });
     });
 
-    it('should store the current time as createdAt value', async () => {
-        const { handler, request, reply, dynamo } = setupTest();
-        await handler(request, reply);
-
-        expect(dynamo.put).toHaveBeenCalledWith(
-            expect.objectContaining({
-                Item: expect.objectContaining({
-                    createdAt: 1567163437497,
-                }),
-            })
-        );
-    });
     it('should return 201 with the non-private entity fields', async () => {
         const { handler, request, reply, userIdentity } = setupTest();
         await handler(request, reply);
@@ -148,10 +125,10 @@ describe('handler', () => {
             });
         });
 
-        it('should return 503 if an error occurs in dynamo', async () => {
+        it('should return 503 if an error occurs in calling the db method', async () => {
             const errorMessage = 'Validation failed';
             const { handler, request, reply } = setupTest({
-                dynamoError: Error(errorMessage),
+                dbError: Error(errorMessage),
             });
 
             await handler(request, reply);

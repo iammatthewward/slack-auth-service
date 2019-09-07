@@ -10,7 +10,7 @@ const handleUpstreamServiceError = (service) => (err = {}) => {
     };
 };
 
-function handlerFactory({ config, dynamo }) {
+function handlerFactory({ config, db }) {
     return async function handler(request, reply) {
         try {
             const handleSlackError = handleUpstreamServiceError('Slack');
@@ -26,17 +26,8 @@ function handlerFactory({ config, dynamo }) {
                 handleSlackError
             );
 
-            const params = {
-                TableName: process.env.USER_IDENTITY_TABLE,
-                Item: {
-                    ...userIdentity,
-                    accessToken,
-                    createdAt: Date.now(),
-                },
-            };
-            await dynamo
-                .put(params)
-                .promise()
+            await db
+                .putUserIdentity({ accessToken, ...userIdentity })
                 .catch(handleDatabaseError);
 
             return reply.code(201).send(userIdentity);

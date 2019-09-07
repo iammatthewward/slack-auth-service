@@ -2,16 +2,16 @@ require('dotenv').config();
 const fastify = require('fastify');
 const oas = require('fastify-oas');
 const env = require('fastify-env');
-const dynamodb = require('fastify-dynamodb');
+const db = require('./plugins/db');
 
 const app = fastify({ logger: true });
 
-const { PORT, HOST, AWS_REGION, AWS_ENDPOINT } = process.env;
+const { PORT, HOST } = process.env;
 
 app
     .register(env, { schema: require('./schema/env'), dotenv: true })
     .register(oas, require('./docs'))
-    .register(dynamodb, { region: AWS_REGION, endpoint: AWS_ENDPOINT })
+    .register(db)
     .register(require('./api'))
     .listen(PORT, HOST, (err, address) => {
         if (err) {
