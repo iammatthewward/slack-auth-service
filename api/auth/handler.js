@@ -1,5 +1,3 @@
-const { getAccessToken, getIdentity } = require('../../services/slack');
-
 const handleUpstreamServiceError = (service) => (err = {}) => {
     throw {
         code: 503,
@@ -10,7 +8,7 @@ const handleUpstreamServiceError = (service) => (err = {}) => {
     };
 };
 
-function handlerFactory({ config, db }) {
+function handlerFactory({ db, slack }) {
     return async function handler(request, reply) {
         try {
             const handleSlackError = handleUpstreamServiceError('Slack');
@@ -19,12 +17,12 @@ function handlerFactory({ config, db }) {
             const { code, error } = request.query;
             if (error) return reply.code(403).send({ error: 'access denied' });
 
-            const accessToken = await getAccessToken(config, code).catch(
-                handleSlackError
-            );
-            const userIdentity = await getIdentity(config, accessToken).catch(
-                handleSlackError
-            );
+            const accessToken = await slack
+                .getAccessToken(code)
+                .catch(handleSlackError);
+            const userIdentity = await slack
+                .getIdentity(accessToken)
+                .catch(handleSlackError);
 
             await db
                 .putUserIdentity({ accessToken, ...userIdentity })

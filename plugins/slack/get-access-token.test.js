@@ -1,9 +1,8 @@
 const qs = require('querystring');
 const { yesno } = require('yesno-http');
-const Slack = require('./index');
+const getAccessTokenFactory = require('./get-access-token');
 
 const setupTest = () => {
-    yesno.restore();
     const code = '12345';
     const accessToken = 'aaabbbcccddd';
     const config = {
@@ -31,20 +30,22 @@ const setupTest = () => {
             },
         },
     ]);
-    return { code, accessToken, config };
+    const getAccessToken = getAccessTokenFactory(config);
+    return { getAccessToken, code, accessToken };
 };
 
 describe('getAccessToken', () => {
+    afterEach(() => yesno.restore());
     it('should throw an error if no code provided', () => {
-        setupTest();
-        return expect(Slack.getAccessToken()).rejects.toEqual(
+        const { getAccessToken } = setupTest();
+        return expect(getAccessToken()).rejects.toEqual(
             new Error('Required param missing: code')
         );
     });
 
     it('should request an access token from Slack', async () => {
-        const { config, code } = setupTest();
-        await Slack.getAccessToken(config, code);
+        const { getAccessToken, code } = setupTest();
+        await getAccessToken(code);
 
         const {
             request: { body },
@@ -59,8 +60,8 @@ describe('getAccessToken', () => {
     });
 
     it('should return the accessToken returned from slack', async () => {
-        const { config, code, accessToken } = setupTest();
-        const output = await Slack.getAccessToken(config, code);
+        const { getAccessToken, code, accessToken } = setupTest();
+        const output = await getAccessToken(code);
 
         expect(output).toEqual(accessToken);
     });

@@ -1,9 +1,8 @@
 const qs = require('querystring');
 const { yesno } = require('yesno-http');
-const Slack = require('./index');
+const getIdentityFactory = require('./get-identity');
 
 const setupTest = () => {
-    yesno.restore();
     const accessToken = 'xoxp-1111827393-16111519414-20367011469-5f89a31i07';
     const userId = 'U0G9QF9C6';
     const userName = 'Fred';
@@ -35,20 +34,22 @@ const setupTest = () => {
             },
         },
     ]);
-    return { config, accessToken, userName, userId, teamId };
+    const getIdentity = getIdentityFactory(config);
+    return { getIdentity, accessToken, userName, userId, teamId };
 };
 
 describe('getIdentity', () => {
+    afterEach(() => yesno.restore());
     it('should throw an error if no authToken provided', () => {
-        setupTest();
-        return expect(Slack.getIdentity()).rejects.toEqual(
+        const { getIdentity } = setupTest();
+        return expect(getIdentity()).rejects.toEqual(
             new Error('Required param missing: authToken')
         );
     });
 
     it('should request a users identity from Slack', async () => {
-        const { config, accessToken } = setupTest();
-        await Slack.getIdentity(config, accessToken);
+        const { getIdentity, accessToken } = setupTest();
+        await getIdentity(accessToken);
 
         const {
             request: { query },
@@ -61,22 +62,22 @@ describe('getIdentity', () => {
     });
 
     it('should return the userName returned from slack', async () => {
-        const { config, accessToken, userName } = setupTest();
-        const output = await Slack.getIdentity(config, accessToken);
+        const { getIdentity, accessToken, userName } = setupTest();
+        const output = await getIdentity(accessToken);
 
         expect(output.userName).toEqual(userName);
     });
 
     it('should return the userId returned from slack', async () => {
-        const { config, accessToken, userId } = setupTest();
-        const output = await Slack.getIdentity(config, accessToken);
+        const { getIdentity, accessToken, userId } = setupTest();
+        const output = await getIdentity(accessToken);
 
         expect(output.userId).toEqual(userId);
     });
 
     it('should return the teamId returned from slack', async () => {
-        const { config, accessToken, teamId } = setupTest();
-        const output = await Slack.getIdentity(config, accessToken);
+        const { getIdentity, accessToken, teamId } = setupTest();
+        const output = await getIdentity(accessToken);
 
         expect(output.teamId).toEqual(teamId);
     });

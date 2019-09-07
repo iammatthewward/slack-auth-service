@@ -1,7 +1,4 @@
 const handlerFactory = require('./handler');
-const Slack = require('../../services/slack');
-
-jest.mock('../../services/slack');
 
 const setupTest = ({ dbError } = {}) => {
     const db = {
@@ -9,8 +6,11 @@ const setupTest = ({ dbError } = {}) => {
             dbError ? Promise.reject(dbError) : Promise.resolve()
         ),
     };
-    const config = {};
-    const app = { config, db };
+    const slack = {
+        getAccessToken: jest.fn(() => Promise.resolve(accessToken)),
+        getIdentity: jest.fn(() => Promise.resolve(userIdentity)),
+    };
+    const app = { db, slack };
     const code = 'XXYYZZ';
     const request = { query: { code } };
     const reply = { code: jest.fn().mockReturnValue({ send: jest.fn() }) };
@@ -20,9 +20,6 @@ const setupTest = ({ dbError } = {}) => {
         userId: 'U0G9QF9C6',
         teamId: 'T0G9PQBBK',
     };
-
-    Slack.getAccessToken.mockImplementation(() => Promise.resolve(accessToken));
-    Slack.getIdentity.mockImplementation(() => Promise.resolve(userIdentity));
 
     const handler = handlerFactory(app);
 
@@ -34,23 +31,23 @@ const setupTest = ({ dbError } = {}) => {
         accessToken,
         userIdentity,
         db,
-        config,
+        slack,
     };
 };
 
 describe('handler', () => {
     it('should exchange the request query code for an access token', async () => {
-        const { handler, request, reply, code, config } = setupTest();
+        const { handler, request, reply, code, slack } = setupTest();
         await handler(request, reply);
 
-        expect(Slack.getAccessToken).toHaveBeenCalledWith(config, code);
+        expect(slack.getAccessToken).toHaveBeenCalledWith(code);
     });
 
     it('should use the access token to request user indentity data', async () => {
-        const { handler, request, reply, accessToken, config } = setupTest();
+        const { handler, request, reply, accessToken, slack } = setupTest();
         await handler(request, reply);
 
-        expect(Slack.getIdentity).toHaveBeenCalledWith(config, accessToken);
+        expect(slack.getIdentity).toHaveBeenCalledWith(accessToken);
     });
 
     it('should store the returned access token and identity', async () => {
@@ -96,10 +93,10 @@ describe('handler', () => {
         });
 
         it('should return 503 if an error occurs in getAccessToken', async () => {
-            const { handler, request, reply } = setupTest();
+            const { handler, request, reply, slack } = setupTest();
 
             const errorMessage = 'Required param missing: code';
-            Slack.getAccessToken.mockRejectedValueOnce(Error(errorMessage));
+            slack.getAccessToken.mockRejectedValueOnce(Error(errorMessage));
 
             await handler(request, reply);
 
@@ -111,10 +108,10 @@ describe('handler', () => {
         });
 
         it('should return 503 if an error occurs in getIdentity', async () => {
-            const { handler, request, reply } = setupTest();
+            const { handler, request, reply, slack } = setupTest();
 
             const errorMessage = 'Required param missing: authToken';
-            Slack.getIdentity.mockRejectedValueOnce(Error(errorMessage));
+            slack.getIdentity.mockRejectedValueOnce(Error(errorMessage));
 
             await handler(request, reply);
 
