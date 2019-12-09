@@ -30,7 +30,10 @@ function start_server() {
 function ctrl_c() {
     echo "** Shutting down **"
     echo "- stopping local dynamodb container"
-    docker stop $DYNAMO_CONTAINER_ID > /dev/null
+    {
+        docker stop $DYNAMO_CONTAINER_ID &&
+        docker rm $DYNAMO_CONTAINER_ID
+    } > /dev/null
 }
 
 start_local_dynamo
