@@ -7,7 +7,7 @@ let clock;
 const setupTest = ({ dynamoError } = {}) => {
     clock = lolex.install({ now: 1567163437497 });
     const config = {
-        userIdentityTable: process.env.USER_IDENTITY_TABLE,
+        USER_IDENTITY_TABLE: process.env.USER_IDENTITY_TABLE,
     };
     const client = {
         put: jest.fn(() => (dynamoError ? Promise.reject() : Promise.resolve())),
@@ -46,7 +46,7 @@ describe('putUserIdentity', () => {
         await putUserIdentity({ accessToken, ...userIdentity });
 
         expect(client.put).toHaveBeenCalledWith({
-            TableName: config.userIdentityTable,
+            TableName: config.USER_IDENTITY_TABLE,
             Item: expect.any(Object),
         });
     });

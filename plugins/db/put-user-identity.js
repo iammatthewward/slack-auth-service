@@ -1,6 +1,8 @@
 const UserIdentity = require('../../models/user-identity');
 
 function putUserIdentityFactory(config, client, logger) {
+    const { USER_IDENTITY_TABLE } = config;
+
     return async function putUserIdentity({ accessToken, ...userData }) {
         const errors = UserIdentity.validate(userData);
 
@@ -10,12 +12,8 @@ function putUserIdentityFactory(config, client, logger) {
         }
 
         return client.put({
-            TableName: process.env.USER_IDENTITY_TABLE,
-            Item: {
-                accessToken,
-                createdAt: Date.now(),
-                ...userData,
-            },
+            TableName: USER_IDENTITY_TABLE,
+            Item: { accessToken, createdAt: Date.now(), ...userData },
         });
     };
 }

@@ -20,6 +20,7 @@ function handlerFactory({ db, slack }) {
             const accessToken = await slack
                 .getAccessToken(code)
                 .catch(handleSlackError);
+
             const userIdentity = await slack
                 .getIdentity(accessToken)
                 .catch(handleSlackError);
